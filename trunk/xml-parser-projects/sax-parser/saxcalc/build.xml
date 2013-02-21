@@ -1,0 +1,79 @@
+<project default="run">
+
+    <!-- A very, very simple Ant script which will compile and run a calculator implementation -->
+    
+	<property name="testfiles" location="testfiles" />
+	
+    <!-- Test file name. Relative to working directory -->
+    <property name="testfile" value="bjp-test1.xml"/>
+
+    <!-- The main class to run -->
+    <property name="main.class" value="uk.ac.manchester.cs.msc.ssd.saxcalc.TestCalculator"/>
+
+    <!-- The directory that contains the jar file dependencies for
+         the class path and building a release -->
+    <property name="libdir" value="./lib"/>
+
+    <!-- The directory where intermediate build products will be placed -->
+    <property name="builddir" value="build"/>
+
+    <!-- A directory into which class files will be placed during the build answer-->
+    <property name="classesdir" value="${builddir}/classes"/>
+
+    <!-- A name of where to jar the binary code -->
+    <property name="bin-name" value="calculator.jar"/>
+
+    <property name="src" value="src/**/*.java"/>
+
+    <!-- Deletes all build products-->
+    <target name="clean">
+        <delete dir="${builddir}"/>
+    </target>
+
+    <!-- Compiles the source into a directory called classes inside
+         the build directory -->
+    <target name="compile">
+        <mkdir dir="${classesdir}"/>
+        <javac srcdir="./" destdir="${classesdir}" debug="on">
+            <include name="${src}"/>
+        </javac>
+    </target>
+
+    <!-- Creates a jar containing the binary code -->
+    <target name="binjar" depends="compile">
+        <jar basedir="${classesdir}" destfile="${builddir}/${bin-name}">
+            <manifest>
+                <attribute name="Title" value="Calculator implementation"/>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+	
+	<!-- external Ant tasks: specifically to use 'for' loop -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
+	
+	<target name="run" depends="compile">
+	    <for param="file">
+	        <path>
+	            <fileset dir="${testfiles}">
+	                <include name="*.xml"/>
+	            </fileset>
+	        </path>
+	        <sequential>
+	            <!-- run program w/ each test file -->
+	            <java classname="${main.class}" classpath="${classesdir}" fork="yes">
+	                <arg value="@{file}"/>
+	            </java>
+	            
+	            <echo message="Input file: @{file}"/>
+	        </sequential>
+	    </for>
+	</target>
+
+</project>

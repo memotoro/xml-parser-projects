@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<project name="namespaces" default="run" basedir=".">
+
+  <!-- enviroment -->
+  <property environment="env"/>
+
+  <!-- global properties -->
+
+  <property name="build" location="build"/>
+  <property name="project.name" value="namespace_analyzer" />
+  <property name="src" location="src" />
+  <property name="dist" location="dist" />
+  <property name="tests" location="tests" />
+  <property name="runner" value="uk.ac.manchester.cs.comp60372.Test" />
+  
+  <path id="project.class.path">
+    <pathelement location="${build}" />
+  </path>
+  
+	<!-- compile source -->
+  <target name="compile" description="Compile source code" depends="clean">
+    <mkdir dir="tests/Output"/>
+    <copy file="tests/namespaceAnalysisReport.dtd" todir="tests/Output"/>
+    <mkdir dir="${build}"/>
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}"/>
+  </target>
+
+	<!-- external Ant tasks: specifically to use 'for' loop -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml">
+  	<classpath>
+    	<pathelement location="ant-contrib-1.0b3.jar"/>
+	</classpath>
+  </taskdef>
+
+
+  <target name="run" depends="compile">
+    
+    <!-- single file test
+    <java classname="${runner}" classpathref="project.class.path" fork="true">
+		      <arg value="tests/Basic/confusing1.xml"/>
+	</java>
+    -->
+    
+    <!-- Loop through all .xml input files -->
+	<for param="file">
+		<path>
+			<fileset dir="${tests}">
+				<include name="*.xml"/>
+				<exclude name="*report*"/>
+			</fileset>
+		</path>
+		<sequential>
+		  <!-- run program w/ each test file -->
+		  <echo message="Input file: @{file}"/>
+		  <java classname="${runner}" classpathref="project.class.path" fork="true">
+		    <arg value="file:@{file}"/>
+		  </java>
+		</sequential>
+	</for>
+	
+  </target>
+
+  <target name="clean" description="Clean up build files">
+    <delete dir="${build}"/>
+  </target>
+
+</project>
